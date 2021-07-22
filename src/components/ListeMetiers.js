@@ -1,10 +1,18 @@
-import React, { Component } from "react";
-import { Select, InputLabel, MenuItem } from "@material-ui/core";
+import React, { Component, Fragment } from "react";
+import { Select, InputLabel, MenuItem, Button } from "@material-ui/core";
 
 class ListeMetiers extends Component {
   constructor(props) {
     super(props);
-    this.state = { niv1: [], niv2: [], niv3: [], niv4: [], niv5: [], nivx: [] };
+    this.state = {
+      niv1: [],
+      niv2: [],
+      niv3: [],
+      niv4: [],
+      niv5: [],
+      nivx: [],
+      selectNaf: "",
+    };
   }
 
   componentDidMount() {
@@ -183,99 +191,137 @@ class ListeMetiers extends Component {
       });
   };
 
+  handleSelectNiv5 = (event) => {
+    this.setState({ selectNaf: event.target.value });
+  };
+  handleSubmit = (event) => {
+    event.preventDefault();
+  };
   render() {
-    const { niv1, niv2, niv3, niv4, niv5 } = this.state;
+    const { niv1, niv2, niv3, niv4, niv5, selectNaf } = this.state;
 
     return (
       <div>
-        <InputLabel id="niv1">Liste des sections</InputLabel>
-        <Select
-          labelId="niv1"
-          id="selectNiv1"
-          autoWidth={true}
-          onChange={this.handleSelectNiv1}
-          defaultValue="default"
+        <form
+          className="admin-form ajouter-recette"
+          onSubmit={this.handleSubmit}
         >
-          <MenuItem value="default" disabled>
-            Sélectionner une sections
-          </MenuItem>
-          {niv1.map((niv) => (
-            <MenuItem key={niv.id} value={niv.id}>
-              {niv.value}
+          <InputLabel id="niv1">Liste des sections</InputLabel>
+          <Select
+            labelId="niv1"
+            id="selectNiv1"
+            autoWidth={true}
+            onChange={this.handleSelectNiv1}
+            defaultValue="default"
+          >
+            <MenuItem value="default" disabled>
+              Sélectionner une sections
             </MenuItem>
-          ))}
-        </Select>
+            {niv1.map((niv) => (
+              <MenuItem key={niv.id} value={niv.id}>
+                {niv.value}
+              </MenuItem>
+            ))}
+          </Select>
 
-        <InputLabel id="niv2">Liste des divisions</InputLabel>
-        <Select
-          labelId="niv2"
-          id="selectNiv2"
-          autoWidth={true}
-          onChange={this.handleSelectNiv2}
-          defaultValue="default"
-        >
-          <MenuItem value="default" disabled>
-            Sélectionner une divisions
-          </MenuItem>
-          {niv2.map((niv) => (
-            <MenuItem key={niv.id} value={niv.id}>
-              {niv.value}
-            </MenuItem>
-          ))}
-        </Select>
+          {niv2.length !== 0 ? (
+            <Fragment>
+              <InputLabel id="niv2">Liste des divisions</InputLabel>
+              <Select
+                labelId="niv2"
+                id="selectNiv2"
+                autoWidth={true}
+                onChange={this.handleSelectNiv2}
+                defaultValue="default"
+              >
+                <MenuItem value="default" disabled>
+                  Sélectionner une divisions
+                </MenuItem>
+                {niv2.map((niv) => (
+                  <MenuItem key={niv.id} value={niv.id}>
+                    {niv.value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Fragment>
+          ) : null}
 
-        <InputLabel id="niv3">Liste des groupes</InputLabel>
-        <Select
-          labelId="niv3"
-          id="selectNiv3"
-          autoWidth={true}
-          onChange={this.handleSelectNiv3}
-          defaultValue="default"
-        >
-          <MenuItem value="default" disabled>
-            Sélectionner un groupe
-          </MenuItem>
-          {niv3.map((niv) => (
-            <MenuItem key={niv.id} value={niv.id}>
-              {niv.value}
-            </MenuItem>
-          ))}
-        </Select>
+          {niv3.length !== 0 ? (
+            <Fragment>
+              <InputLabel id="niv3">Liste des groupes</InputLabel>
+              <Select
+                labelId="niv3"
+                id="selectNiv3"
+                autoWidth={true}
+                onChange={this.handleSelectNiv3}
+                defaultValue="default"
+              >
+                <MenuItem value="default" disabled>
+                  Sélectionner un groupe
+                </MenuItem>
+                {niv3.map((niv) => (
+                  <MenuItem key={niv.id} value={niv.id}>
+                    {niv.value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Fragment>
+          ) : null}
 
-        <InputLabel id="niv4">Liste des classes</InputLabel>
-        <Select
-          labelId="niv4"
-          id="selectNiv4"
-          autoWidth={true}
-          onChange={this.handleSelectNiv4}
-          defaultValue="default"
-        >
-          <MenuItem value="default" disabled>
-            Sélectionner une classe
-          </MenuItem>
-          {niv4.map((niv) => (
-            <MenuItem key={niv.id} value={niv.id}>
-              {niv.value}
-            </MenuItem>
-          ))}
-        </Select>
+          {niv4.length !== 0 ? (
+            <Fragment>
+              <InputLabel id="niv4">Liste des classes</InputLabel>
+              <Select
+                labelId="niv4"
+                id="selectNiv4"
+                autoWidth={true}
+                onChange={this.handleSelectNiv4}
+                defaultValue="default"
+              >
+                <MenuItem value="default" disabled>
+                  Sélectionner une classe
+                </MenuItem>
+                {niv4.map((niv) => (
+                  <MenuItem key={niv.id} value={niv.id}>
+                    {niv.value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Fragment>
+          ) : null}
 
-        <InputLabel id="niv5">Liste des sous-classes</InputLabel>
-        <Select
-          labelId="niv5"
-          id="selectNiv5"
-          autoWidth={true}
-          defaultValue="default"
-        >
-          <MenuItem value="default" disabled>
-            Sélectionner une sous-classe
-          </MenuItem>
-          {niv5.map((niv) => (
-            <MenuItem key={niv.id} value={niv.id}>
-              {niv.value}
-            </MenuItem>
-          ))}
-        </Select>
+          {niv5.length !== 0 ? (
+            <Fragment>
+              <InputLabel id="niv5">Liste des sous-classes</InputLabel>
+              <Select
+                labelId="niv5"
+                id="selectNiv5"
+                autoWidth={true}
+                onChange={this.handleSelectNiv5}
+                defaultValue="default"
+              >
+                <MenuItem value="default" disabled>
+                  Sélectionner une sous-classe
+                </MenuItem>
+                {niv5.map((niv) => (
+                  <MenuItem key={niv.id} value={niv.id}>
+                    {niv.value}
+                  </MenuItem>
+                ))}
+              </Select>
+            </Fragment>
+          ) : null}
+          <br />
+          <br />
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={selectNaf === ""}
+          >
+            Valider
+          </Button>
+        </form>
       </div>
     );
   }
