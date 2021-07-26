@@ -1,8 +1,9 @@
 import React, { Component, Fragment } from "react";
+import { withRouter } from "react-router";
 
 import axios from "axios";
 import querystring from "query-string";
-import { Select, InputLabel, MenuItem } from "@material-ui/core";
+import { Select, InputLabel, MenuItem, Button } from "@material-ui/core";
 
 class ListDepartements extends Component {
   constructor(props) {
@@ -56,30 +57,52 @@ class ListDepartements extends Component {
       });
   }
 
+  handleSelectDep = (event) => {
+    this.props.updateCodeDep(event.target.value);
+  };
+
+  handleSubmit = (event) => {
+    event.preventDefault();
+    this.props.history.push("/listeResults");
+  };
+
   render() {
     const { departements } = this.state;
+    const codeDep = this.props.codeDep;
     return (
       <Fragment>
-        <InputLabel id="niv1">Liste des départements</InputLabel>
-        <Select
-          labelId="niv1"
-          id="selectNiv1"
-          autoWidth={true}
-          onChange={this.handleSelectNiv1}
-          defaultValue="default"
-        >
-          <MenuItem value="default" disabled>
-            Sélectionner un départements
-          </MenuItem>
-          {departements.map((departement) => (
-            <MenuItem key={departement.code} value={departement.code}>
-              {departement.code} - {departement.intitule}
+        <form onSubmit={this.handleSubmit}>
+          <InputLabel id="dep">Liste des départements</InputLabel>
+          <Select
+            labelId="dep"
+            id="selectDep"
+            autoWidth={true}
+            onChange={this.handleSelectDep.bind(this)}
+            defaultValue="default"
+          >
+            <MenuItem value="default" disabled>
+              Sélectionner un départements
             </MenuItem>
-          ))}
-        </Select>
+            {departements.map((departement) => (
+              <MenuItem key={departement.code} value={departement.code}>
+                {departement.code} - {departement.intitule}
+              </MenuItem>
+            ))}
+          </Select>
+          <br />
+          <br />
+          <Button
+            variant="contained"
+            color="primary"
+            type="submit"
+            disabled={codeDep === ""}
+          >
+            Valider
+          </Button>
+        </form>
       </Fragment>
     );
   }
 }
 
-export default ListDepartements;
+export default withRouter(ListDepartements);

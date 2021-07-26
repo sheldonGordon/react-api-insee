@@ -63,6 +63,7 @@ class ListResults extends Component {
 
   render() {
     const { token, etablissements } = this.state;
+    const { codeDep, codeNaf } = this.props;
     var id = 0;
     const listEtablissements = etablissements.map((etablissement) => {
       if (etablissement.uniteLegale.nomUniteLegale != null) {
@@ -76,6 +77,8 @@ class ListResults extends Component {
 
     return (
       <Fragment>
+        <p>{codeNaf}</p>
+        <p>{codeDep}</p>
         <p>{token}</p>
         <p>{listEtablissements}</p>
       </Fragment>

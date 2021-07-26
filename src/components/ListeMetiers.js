@@ -1,4 +1,6 @@
 import React, { Component, Fragment } from "react";
+import { withRouter } from "react-router";
+
 import { Select, InputLabel, MenuItem, Button } from "@material-ui/core";
 
 class ListeMetiers extends Component {
@@ -11,7 +13,6 @@ class ListeMetiers extends Component {
       niv4: [],
       niv5: [],
       nivx: [],
-      selectNaf: "",
     };
   }
 
@@ -61,6 +62,7 @@ class ListeMetiers extends Component {
       niv3: [],
       niv4: [],
       niv5: [],
+      selectNaf: "",
     });
 
     const listIdNiv2 = [
@@ -96,6 +98,7 @@ class ListeMetiers extends Component {
       niv3: [],
       niv4: [],
       niv5: [],
+      selectNaf: "",
     });
 
     const listIdNiv3 = [
@@ -130,6 +133,7 @@ class ListeMetiers extends Component {
     this.setState({
       niv4: [],
       niv5: [],
+      selectNaf: "",
     });
 
     const listIdNiv4 = [
@@ -163,6 +167,7 @@ class ListeMetiers extends Component {
 
     this.setState({
       niv5: [],
+      selectNaf: "",
     });
 
     const listIdNiv5 = [
@@ -191,21 +196,21 @@ class ListeMetiers extends Component {
       });
   };
 
-  handleSelectNiv5 = (event) => {
-    this.setState({ selectNaf: event.target.value });
+  handleSelectNaf = (event) => {
+    this.props.updateCodeNaf(event.target.value);
   };
+
   handleSubmit = (event) => {
     event.preventDefault();
+    this.props.history.push("/listeDepartements");
   };
-  render() {
-    const { niv1, niv2, niv3, niv4, niv5, selectNaf } = this.state;
 
+  render() {
+    const { niv1, niv2, niv3, niv4, niv5 } = this.state;
+    const codeNaf = this.props.codeNaf;
     return (
       <div>
-        <form
-          className="admin-form ajouter-recette"
-          onSubmit={this.handleSubmit}
-        >
+        <form onSubmit={this.handleSubmit}>
           <InputLabel id="niv1">Liste des sections</InputLabel>
           <Select
             labelId="niv1"
@@ -297,7 +302,7 @@ class ListeMetiers extends Component {
                 labelId="niv5"
                 id="selectNiv5"
                 autoWidth={true}
-                onChange={this.handleSelectNiv5}
+                onChange={this.handleSelectNaf.bind(this)}
                 defaultValue="default"
               >
                 <MenuItem value="default" disabled>
@@ -317,7 +322,7 @@ class ListeMetiers extends Component {
             variant="contained"
             color="primary"
             type="submit"
-            disabled={selectNaf === ""}
+            disabled={codeNaf === ""}
           >
             Valider
           </Button>
@@ -327,4 +332,4 @@ class ListeMetiers extends Component {
   }
 }
 
-export default ListeMetiers;
+export default withRouter(ListeMetiers);
