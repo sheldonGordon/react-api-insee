@@ -1,7 +1,15 @@
 import React, { Component, Fragment } from "react";
 import { withRouter } from "react-router";
 
-import { Select, InputLabel, MenuItem, Button } from "@material-ui/core";
+import {
+  Select,
+  InputLabel,
+  MenuItem,
+  Button,
+  Container,
+  TextField,
+} from "@material-ui/core";
+import { Autocomplete } from "@material-ui/lab";
 
 class ListeMetiers extends Component {
   constructor(props) {
@@ -12,12 +20,14 @@ class ListeMetiers extends Component {
       niv3: [],
       niv4: [],
       niv5: [],
+      niv5All: [],
       nivx: [],
     };
   }
 
   componentDidMount() {
     const niveau1 = require("../resources/xls/naf2008_liste_n1.csv");
+    const niveau5 = require("../resources/xls/naf2008_liste_n5.csv");
     const niveaux = require("../resources/xls/naf2008_5_niveaux.csv");
 
     fetch(niveau1.default)
@@ -31,6 +41,21 @@ class ListeMetiers extends Component {
           };
           this.setState({
             niv1: [...this.state.niv1, tmpNiv1],
+          });
+        });
+      });
+
+    fetch(niveau5.default)
+      .then((r) => r.text())
+      .then((text) => {
+        text.split("\n").forEach((line) => {
+          const lineSplit = line.split(":");
+          const tmpNiv5All = {
+            id: lineSplit[0],
+            value: lineSplit[1],
+          };
+          this.setState({
+            niv5All: [...this.state.niv5All, tmpNiv5All],
           });
         });
       });
@@ -64,7 +89,7 @@ class ListeMetiers extends Component {
       niv5: [],
       selectNaf: "",
     });
-
+    this.props.updateCodeNaf("");
     const listIdNiv2 = [
       ...new Set(
         this.state.nivx
@@ -100,7 +125,7 @@ class ListeMetiers extends Component {
       niv5: [],
       selectNaf: "",
     });
-
+    this.props.updateCodeNaf("");
     const listIdNiv3 = [
       ...new Set(
         this.state.nivx
@@ -135,7 +160,7 @@ class ListeMetiers extends Component {
       niv5: [],
       selectNaf: "",
     });
-
+    this.props.updateCodeNaf("");
     const listIdNiv4 = [
       ...new Set(
         this.state.nivx
@@ -163,13 +188,11 @@ class ListeMetiers extends Component {
   };
 
   handleSelectNiv4 = (event) => {
-    const niveau5 = require("../resources/xls/naf2008_liste_n5.csv");
-
     this.setState({
       niv5: [],
       selectNaf: "",
     });
-
+    this.props.updateCodeNaf("");
     const listIdNiv5 = [
       ...new Set(
         this.state.nivx
@@ -178,26 +201,29 @@ class ListeMetiers extends Component {
       ),
     ];
 
-    fetch(niveau5.default)
-      .then((r) => r.text())
-      .then((text) => {
-        text.split("\n").forEach((line) => {
-          const lineSplit = line.split(":");
-          if (listIdNiv5.indexOf(lineSplit[0]) !== -1) {
-            const tmpNiv5 = {
-              id: lineSplit[0],
-              value: lineSplit[1],
-            };
-            this.setState({
-              niv5: [...this.state.niv5, tmpNiv5],
-            });
-          }
+    this.state.niv5All.forEach((niv5) => {
+      if (listIdNiv5.indexOf(niv5.id) !== -1) {
+        const tmpNiv5 = {
+          id: niv5.id,
+          value: niv5.value,
+        };
+        this.setState({
+          niv5: [...this.state.niv5, tmpNiv5],
         });
-      });
+      }
+    });
   };
 
   handleSelectNaf = (event) => {
     this.props.updateCodeNaf(event.target.value);
+  };
+
+  handleSelectNafAuto = (event, value) => {
+    if (value != null) {
+      this.props.updateCodeNaf(value.id);
+    } else {
+      this.props.updateCodeNaf("");
+    }
   };
 
   handleSubmit = (event) => {
@@ -206,128 +232,150 @@ class ListeMetiers extends Component {
   };
 
   render() {
-    const { niv1, niv2, niv3, niv4, niv5 } = this.state;
+    const { niv1, niv2, niv3, niv4, niv5, niv5All } = this.state;
     const codeNaf = this.props.codeNaf;
     return (
-      <div>
-        <form onSubmit={this.handleSubmit}>
-          <InputLabel id="niv1">Liste des sections</InputLabel>
-          <Select
-            labelId="niv1"
-            id="selectNiv1"
-            autoWidth={true}
-            onChange={this.handleSelectNiv1}
-            defaultValue="default"
-          >
-            <MenuItem value="default" disabled>
-              Sélectionner une sections
-            </MenuItem>
-            {niv1.map((niv) => (
-              <MenuItem key={niv.id} value={niv.id}>
-                {niv.value}
+      <Fragment>
+        <Container style={{ textAlign: "center" }}>
+          <form onSubmit={this.handleSubmit}>
+            <InputLabel id="niv1">Liste des sections</InputLabel>
+            <Select
+              labelId="niv1"
+              id="selectNiv1"
+              autoWidth={true}
+              onChange={this.handleSelectNiv1}
+              defaultValue="default"
+            >
+              <MenuItem value="default" disabled>
+                Sélectionner une sections
               </MenuItem>
-            ))}
-          </Select>
-
-          {niv2.length !== 0 ? (
-            <Fragment>
-              <InputLabel id="niv2">Liste des divisions</InputLabel>
-              <Select
-                labelId="niv2"
-                id="selectNiv2"
-                autoWidth={true}
-                onChange={this.handleSelectNiv2}
-                defaultValue="default"
-              >
-                <MenuItem value="default" disabled>
-                  Sélectionner une divisions
+              {niv1.map((niv) => (
+                <MenuItem key={niv.id} value={niv.id}>
+                  {niv.value}
                 </MenuItem>
-                {niv2.map((niv) => (
-                  <MenuItem key={niv.id} value={niv.id}>
-                    {niv.value}
-                  </MenuItem>
-                ))}
-              </Select>
-            </Fragment>
-          ) : null}
+              ))}
+            </Select>
 
-          {niv3.length !== 0 ? (
-            <Fragment>
-              <InputLabel id="niv3">Liste des groupes</InputLabel>
-              <Select
-                labelId="niv3"
-                id="selectNiv3"
-                autoWidth={true}
-                onChange={this.handleSelectNiv3}
-                defaultValue="default"
-              >
-                <MenuItem value="default" disabled>
-                  Sélectionner un groupe
-                </MenuItem>
-                {niv3.map((niv) => (
-                  <MenuItem key={niv.id} value={niv.id}>
-                    {niv.value}
+            {niv2.length !== 0 ? (
+              <Fragment>
+                <InputLabel id="niv2">Liste des divisions</InputLabel>
+                <Select
+                  labelId="niv2"
+                  id="selectNiv2"
+                  autoWidth={true}
+                  onChange={this.handleSelectNiv2}
+                  defaultValue="default"
+                >
+                  <MenuItem value="default" disabled>
+                    Sélectionner une divisions
                   </MenuItem>
-                ))}
-              </Select>
-            </Fragment>
-          ) : null}
+                  {niv2.map((niv) => (
+                    <MenuItem key={niv.id} value={niv.id}>
+                      {niv.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Fragment>
+            ) : null}
 
-          {niv4.length !== 0 ? (
-            <Fragment>
-              <InputLabel id="niv4">Liste des classes</InputLabel>
-              <Select
-                labelId="niv4"
-                id="selectNiv4"
-                autoWidth={true}
-                onChange={this.handleSelectNiv4}
-                defaultValue="default"
-              >
-                <MenuItem value="default" disabled>
-                  Sélectionner une classe
-                </MenuItem>
-                {niv4.map((niv) => (
-                  <MenuItem key={niv.id} value={niv.id}>
-                    {niv.value}
+            {niv3.length !== 0 ? (
+              <Fragment>
+                <InputLabel id="niv3">Liste des groupes</InputLabel>
+                <Select
+                  labelId="niv3"
+                  id="selectNiv3"
+                  autoWidth={true}
+                  onChange={this.handleSelectNiv3}
+                  defaultValue="default"
+                >
+                  <MenuItem value="default" disabled>
+                    Sélectionner un groupe
                   </MenuItem>
-                ))}
-              </Select>
-            </Fragment>
-          ) : null}
+                  {niv3.map((niv) => (
+                    <MenuItem key={niv.id} value={niv.id}>
+                      {niv.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Fragment>
+            ) : null}
 
-          {niv5.length !== 0 ? (
-            <Fragment>
-              <InputLabel id="niv5">Liste des sous-classes</InputLabel>
-              <Select
-                labelId="niv5"
-                id="selectNiv5"
-                autoWidth={true}
-                onChange={this.handleSelectNaf.bind(this)}
-                defaultValue="default"
-              >
-                <MenuItem value="default" disabled>
-                  Sélectionner une sous-classe
-                </MenuItem>
-                {niv5.map((niv) => (
-                  <MenuItem key={niv.id} value={niv.id}>
-                    {niv.value}
+            {niv4.length !== 0 ? (
+              <Fragment>
+                <InputLabel id="niv4">Liste des classes</InputLabel>
+                <Select
+                  labelId="niv4"
+                  id="selectNiv4"
+                  autoWidth={true}
+                  onChange={this.handleSelectNiv4}
+                  defaultValue="default"
+                >
+                  <MenuItem value="default" disabled>
+                    Sélectionner une classe
                   </MenuItem>
-                ))}
-              </Select>
-            </Fragment>
-          ) : null}
-          <br />
-          <br />
-          <Button
-            variant="contained"
-            color="primary"
-            type="submit"
-            disabled={codeNaf === ""}
-          >
-            Valider
-          </Button>
-        </form>
-      </div>
+                  {niv4.map((niv) => (
+                    <MenuItem key={niv.id} value={niv.id}>
+                      {niv.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Fragment>
+            ) : null}
+
+            {niv5.length !== 0 ? (
+              <Fragment>
+                <InputLabel id="niv5">Liste des sous-classes</InputLabel>
+                <Select
+                  labelId="niv5"
+                  id="selectNiv5"
+                  autoWidth={true}
+                  onChange={this.handleSelectNaf.bind(this)}
+                  defaultValue="default"
+                >
+                  <MenuItem value="default" disabled>
+                    Sélectionner une sous-classe
+                  </MenuItem>
+                  {niv5.map((niv) => (
+                    <MenuItem key={niv.id} value={niv.id}>
+                      {niv.value}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </Fragment>
+            ) : null}
+            <br />
+            <br />
+            <p>OU</p>
+            <br />
+            <br />
+            <div style={{textAlign: "center"}}>
+              <Autocomplete
+                options={niv5All}
+                getOptionLabel={(niv) => niv.value}
+                style={{ width: 500 }}
+                onChange={this.handleSelectNafAuto.bind(this)}
+                renderInput={(params) => (
+                  <TextField
+                    {...params}
+                    label="Rechercher un métier"
+                    variant="outlined"
+                  />
+                )}
+              />
+            </div>
+            <br />
+            <br />
+            <Button
+              variant="contained"
+              color="primary"
+              type="submit"
+              disabled={codeNaf === ""}
+            >
+              Valider
+            </Button>
+          </form>
+        </Container>
+      </Fragment>
     );
   }
 }

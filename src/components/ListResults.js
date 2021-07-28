@@ -8,10 +8,26 @@ import querystring from "query-string";
 class ListResults extends Component {
   constructor(props) {
     super(props);
-    this.state = { token: null, etablissements: [] };
+    const today = new Date();
+    const date =
+      today.getFullYear() +
+      "-" +
+      ((today.getMonth() + 1)<10?"0"+(today.getMonth() + 1) : (today.getMonth() + 1)) +
+      "-" +
+      today.getDate();
+
+    this.state = {
+      token: null,
+      etablissements: [],
+      header: {},
+      date: date,
+      nombre: 1000,
+    };
   }
 
   componentDidMount() {
+    const { codeDep, codeNaf } = this.props;
+    const { date, nombre } = this.state;
     const data = {
       grant_type: "client_credentials",
       validity_period: 604800,
@@ -40,8 +56,16 @@ class ListResults extends Component {
         sirene.defaults.headers.common["Accept"] = "application/json";
         const params = {
           params: {
-            q: "codePostalEtablissement:[59000 TO 59999] AND activitePrincipaleUniteLegale:62.01Z AND etatAdministratifUniteLegale:A",
-            date: "2021-06-21",
+            q:
+              "codePostalEtablissement:[" +
+              codeDep +
+              "000 TO " +
+              codeDep +
+              "999] AND activitePrincipaleUniteLegale:" +
+              codeNaf +
+              " AND etatAdministratifUniteLegale:A",
+            date: date,
+            nombre: nombre,
           },
         };
         sirene
@@ -49,6 +73,7 @@ class ListResults extends Component {
           .then((response) => {
             this.setState({
               etablissements: response.data.etablissements,
+              header: response.data.header,
             });
             console.log(response);
           })
@@ -62,7 +87,7 @@ class ListResults extends Component {
   }
 
   render() {
-    const { token, etablissements } = this.state;
+    const { token, etablissements, header } = this.state;
     const { codeDep, codeNaf } = this.props;
     var id = 0;
     const listEtablissements = etablissements.map((etablissement) => {
@@ -77,6 +102,7 @@ class ListResults extends Component {
 
     return (
       <Fragment>
+        <p>{header.total}</p>
         <p>{codeNaf}</p>
         <p>{codeDep}</p>
         <p>{token}</p>

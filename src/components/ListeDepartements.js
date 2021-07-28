@@ -3,7 +3,12 @@ import { withRouter } from "react-router";
 
 import axios from "axios";
 import querystring from "query-string";
-import { Select, InputLabel, MenuItem, Button } from "@material-ui/core";
+import {
+  Select,
+  InputLabel,
+  MenuItem,
+  Button,
+} from "@material-ui/core";
 
 class ListDepartements extends Component {
   constructor(props) {
@@ -61,6 +66,14 @@ class ListDepartements extends Component {
     this.props.updateCodeDep(event.target.value);
   };
 
+  handleSelectCom = (event, value) => {
+    if (value != null) {
+      this.props.updateCodeCom(value.code);
+    } else {
+      this.props.updateCodeCom("");
+    }
+  };
+
   handleSubmit = (event) => {
     event.preventDefault();
     this.props.history.push("/listeResults");
@@ -68,7 +81,7 @@ class ListDepartements extends Component {
 
   render() {
     const { departements } = this.state;
-    const codeDep = this.props.codeDep;
+    const { codeDep } = this.props.codeDep;
     return (
       <Fragment>
         <form onSubmit={this.handleSubmit}>
