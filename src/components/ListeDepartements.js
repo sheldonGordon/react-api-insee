@@ -4,6 +4,7 @@ import { withRouter } from "react-router";
 import axios from "axios";
 import querystring from "query-string";
 import { Select, InputLabel, MenuItem, Button } from "@material-ui/core";
+import Autocomplete from "react-google-autocomplete";
 
 class ListDepartements extends Component {
   constructor(props) {
@@ -89,6 +90,15 @@ class ListDepartements extends Component {
               </MenuItem>
             ))}
           </Select>
+          <br />
+          <br />
+          <Autocomplete
+            apiKey="3AIzaSyBxYWqRQwP60wOhjyE6kXVDM3GpaVLi_ro"
+            onPlaceSelected={(place) => {
+              console.log(place);
+            }}
+          />
+          ;
           <br />
           <br />
           <Button
