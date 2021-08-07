@@ -24,8 +24,8 @@ class ListResults extends Component {
       token: null,
       etablissements: [],
       date: date,
+      curseur: "*",
       nombreResultRequeteTotal: 0,
-      nombreDebutRequete: 0,
       nombreResultRequete: 1000,
       typeVoie: [
         { court: "ALL", long: "Allée" },
@@ -74,14 +74,9 @@ class ListResults extends Component {
     };
   }
 
-  componentDidMount() {
+  handleGetEtablissement() {
     const { codeDep, codeNaf } = this.props;
-    const {
-      date,
-      nombreResultRequete,
-      nombreDebutRequete,
-      nombreResultRequeteTotal,
-    } = this.state;
+    const { date, nombreResultRequete } = this.state;
     const data = {
       grant_type: "client_credentials",
       validity_period: 604800,
@@ -102,79 +97,76 @@ class ListResults extends Component {
           token: token,
         });
 
-        do {
-          console.log("je boucle");
-          const sirene = axios.create({
-            baseURL: "https://api.insee.fr/entreprises/sirene/V3",
-          });
-          sirene.defaults.headers.common["Authorization"] =
-            "Bearer " + this.state.token;
-          sirene.defaults.headers.common["Accept"] = "application/json";
-          const params = {
-            params: {
-              q:
-                "activitePrincipaleUniteLegale:" +
-                codeNaf +
-                " AND etatAdministratifUniteLegale:A",
-              date: date,
-              tri: "siret",
-              debut: nombreDebutRequete,
-              nombre: nombreResultRequete,
-              champs:
-                "siret,denominationUniteLegale,numeroVoieEtablissement,typeVoieEtablissement,libelleVoieEtablissement,codePostalEtablissement,libelleCommuneEtablissement",
-            },
-          };
-          sirene
-            .get("/siret", params)
-            .then((response) => {
-              const tmpEtablissements = this.state.etablissements.concat(
-                response.data.etablissements
-              );
-              console.log(response.data.header.total);
-              this.setState({
-                etablissements: tmpEtablissements,
-                nombreResultRequeteTotal: response.data.header.total,
-                nombreDebutRequete:
-                  this.state.nombreDebutRequete + nombreResultRequete,
-              });
+        const sirene = axios.create({
+          baseURL: "https://api.insee.fr/entreprises/sirene/V3",
+        });
+        sirene.defaults.headers.common["Authorization"] =
+          "Bearer " + this.state.token;
+        sirene.defaults.headers.common["Accept"] = "application/json";
 
-              console.log(response);
-            })
-            .catch((error) => {
-              console.log(error);
-            });
-          console.log(
-            "test : nb: " +
-              nombreDebutRequete +
-              " < total: " +
-              nombreResultRequeteTotal +
-              " => " +
-              (nombreDebutRequete < nombreResultRequeteTotal)
-          );
-        } while (nombreDebutRequete < nombreResultRequeteTotal);
+        console.log("debut de fonction");
+        console.log("curseur " + this.state.curseur);
+        const params = {
+          params: {
+            q:
+              "activitePrincipaleUniteLegale:" +
+              codeNaf +
+              " AND etatAdministratifUniteLegale:A" +
+              " AND codeCommuneEtablissement: [" +
+              codeDep +
+              "000 TO " +
+              codeDep +
+              "999]",
+            date: date,
+            tri: "siret",
+            curseur: this.state.curseur,
+            nombre: nombreResultRequete,
+            champs:
+              "siret,denominationUniteLegale,numeroVoieEtablissement,typeVoieEtablissement,libelleVoieEtablissement,codePostalEtablissement,libelleCommuneEtablissement",
+          },
+        };
+
+        sirene
+          .get("/siret", params)
+          .then((response) => {
+            this.setState((state) => ({
+              etablissements: state.etablissements.concat(
+                response.data.etablissements
+              ),
+              nombreResultRequeteTotal: response.data.header.total,
+            }));
+            if (
+              response.data.header.curseurSuivant != null &&
+              response.data.header.curseurSuivant !== this.state.curseur
+            ) {
+              this.setState({
+                curseur: response.data.header.curseurSuivant,
+              });
+              this.handleGetEtablissement();
+            } else {
+              this.setState({
+                curseur: "*",
+              });
+            }
+          })
+          .catch((error) => {
+            console.log(error);
+          });
       })
       .catch((error) => {
         console.log(error);
       });
+
+    console.log("fin de fonction");
+  }
+
+  componentDidMount() {
+    this.handleGetEtablissement();
   }
 
   render() {
     const { token, etablissements, nombreResultRequeteTotal } = this.state;
     const { codeDep, codeNaf } = this.props;
-    var id = 0;
-    /*const listEtablissements = etablissements.map((etablissement) => {
-      if (etablissement.uniteLegale.denominationUniteLegale != null) {
-        id++;
-        return (
-          <p key={id}>{etablissement.uniteLegale.denominationUniteLegale}</p>
-        );
-      } else {
-        id++;
-        return <p key={id}>Sans nom</p>;
-      }
-        <p>{listEtablissements}</p>
-    });*/
-
     return (
       <Fragment>
         <p>{nombreResultRequeteTotal}</p>
