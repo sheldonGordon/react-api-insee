@@ -3,6 +3,12 @@ import React, { Component, Fragment } from "react";
 import axios from "axios";
 import querystring from "query-string";
 import Geocode from "react-geocode";
+import {
+  withScriptjs,
+  withGoogleMap,
+  GoogleMap,
+  Marker,
+} from "react-google-maps";
 
 class ListResults extends Component {
   constructor(props) {
@@ -214,6 +220,26 @@ class ListResults extends Component {
       etablissementslatlng,
     } = this.state;
     const { codeDep, codeNaf } = this.props;
+    const MyMapComponent = withScriptjs(
+      withGoogleMap((props) => (
+        <GoogleMap
+          defaultZoom={5}
+          defaultCenter={{ lat: 50.29391976374128, lng: 2.7764447298785684 }}
+          isMarkerShown
+        >
+          <Marker position={{ lat: -34.397, lng: 150.644 }} />
+          {etablissementslatlng.map((elatlng, index) => {
+            return (
+              <Marker
+                key={index}
+                position={{ lat: elatlng.lat, lng: elatlng.lng }}
+              />
+            );
+          })}
+        </GoogleMap>
+      ))
+    );
+
     return (
       <Fragment>
         <p>{nombreResultRequeteTotal}</p>
@@ -221,15 +247,12 @@ class ListResults extends Component {
         <p>{codeDep}</p>
         <p>{token}</p>
         <p>{etablissements.length}</p>
-        <div>
-          {etablissementslatlng.map((elatlng, index) => {
-            return (
-              <p key={index}>
-                {elatlng.siret} {elatlng.lat} {elatlng.lng}
-              </p>
-            );
-          })}
-        </div>
+        <MyMapComponent
+          googleMapURL="https://maps.googleapis.com/maps/api/js?v=3.exp&libraries=geometry,drawing,places"
+          loadingElement={<div style={{ height: `100%` }} />}
+          containerElement={<div style={{ height: `400px` }} />}
+          mapElement={<div style={{ height: `100%` }} />}
+        />
       </Fragment>
     );
   }
