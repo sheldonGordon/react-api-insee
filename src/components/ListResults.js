@@ -2,8 +2,7 @@ import React, { Component, Fragment } from "react";
 
 import axios from "axios";
 import querystring from "query-string";
-
-//import './App.css';
+import Geocode from "react-geocode";
 
 class ListResults extends Component {
   constructor(props) {
@@ -27,6 +26,7 @@ class ListResults extends Component {
       curseur: "*",
       nombreResultRequeteTotal: 0,
       nombreResultRequete: 1000,
+      etablissementslatlng: [],
       typeVoie: [
         { court: "ALL", long: "Allée" },
         { court: "AV", long: "Avenue" },
@@ -103,9 +103,6 @@ class ListResults extends Component {
         sirene.defaults.headers.common["Authorization"] =
           "Bearer " + this.state.token;
         sirene.defaults.headers.common["Accept"] = "application/json";
-
-        console.log("debut de fonction");
-        console.log("curseur " + this.state.curseur);
         const params = {
           params: {
             q:
@@ -157,15 +154,65 @@ class ListResults extends Component {
         console.log(error);
       });
 
-    console.log("fin de fonction");
+    const typeVoie = this.state.typeVoie;
+    this.state.etablissements.map((etablissement) => {
+      const adr = etablissement.adresseEtablissement;
+      const libelleVoieCourt = adr.libelleVoieEtablissement;
+      let libelleVoieLong = "";
+      typeVoie.map((voie) => {
+        if (voie.court === libelleVoieCourt) {
+          libelleVoieLong = voie.long;
+        }
+      });
+      Geocode.fromAddress(
+        adr.numeroVoieEtablissement +
+          " " +
+          libelleVoieLong +
+          " " +
+          adr.libelleVoieEtablissement +
+          " " +
+          adr.codePostalEtablissement +
+          " " +
+          adr.libelleCommuneEtablissement
+      ).then(
+        (response) => {
+          const { lat, lng } = response.results[0].geometry.location;
+          console.log(lat, lng);
+          const etablissementslatlng = {
+            siret: etablissement.siret,
+            lat: lat,
+            lng: lng,
+          };
+          this.setState((state) => ({
+            etablissementslatlng:
+              state.etablissementslatlng.concat(etablissementslatlng),
+          }));
+        },
+        (error) => {
+          console.error(error);
+        }
+      );
+    });
+  }
+
+  handleInitGeoCode() {
+    Geocode.setApiKey("AIzaSyAw-3bqrjsU25W8Ai06aTlRWZ4oCOvH_Ok");
+    Geocode.setLanguage("fr");
+    Geocode.setRegion("fr");
   }
 
   componentDidMount() {
+    this.handleInitGeoCode();
     this.handleGetEtablissement();
   }
 
   render() {
-    const { token, etablissements, nombreResultRequeteTotal } = this.state;
+    const {
+      token,
+      etablissements,
+      nombreResultRequeteTotal,
+      etablissementslatlng,
+    } = this.state;
     const { codeDep, codeNaf } = this.props;
     return (
       <Fragment>
@@ -174,9 +221,15 @@ class ListResults extends Component {
         <p>{codeDep}</p>
         <p>{token}</p>
         <p>{etablissements.length}</p>
-        {etablissements.map((etablissement, index) => {
-          return <p key={index}>{index}</p>;
-        })}
+        <div>
+          {etablissementslatlng.map((elatlng, index) => {
+            return (
+              <p key={index}>
+                {elatlng.siret} {elatlng.lat} {elatlng.lng}
+              </p>
+            );
+          })}
+        </div>
       </Fragment>
     );
   }
