@@ -29,7 +29,7 @@ class ListDepartements extends Component {
     };
 
     axios
-      .post("https://api.insee.fr/token", querystring.stringify(data), headers)
+      .post("https://cors-anywhere.herokuapp.com/https://api.insee.fr/token", querystring.stringify(data), headers)
       .then((response) => {
         let token = response.data.access_token;
         this.setState({
@@ -37,7 +37,7 @@ class ListDepartements extends Component {
         });
 
         const geo = axios.create({
-          baseURL: "https://api.insee.fr/metadonnees/V1/geo",
+          baseURL: "https://cors-anywhere.herokuapp.com/https://api.insee.fr/metadonnees/V1/geo",
         });
         geo.defaults.headers.common["Authorization"] =
           "Bearer " + this.state.token;
